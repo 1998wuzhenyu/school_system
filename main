@@ -1,0 +1,247 @@
+
+
+#include<iostream>
+using namespace std;
+#include"Identity.h"
+#include<fstream> 
+#include<string>
+#include"globalFile.h"
+#include"student.h"
+#include"teacher.h"
+#include"manager.h"
+
+
+//进入学生子菜单界面
+void studentMenu(Identity* &student)
+{
+	while(true)
+	{
+		//调用学生子菜单
+		student->operMenu();
+		Student * stu=(Student*)student;
+		 int select=0;
+
+		 cin>>select;
+		 
+		 if(select==1)
+		 {
+			 stu->applyOrder();//申请预约
+
+		 }
+		 else if(select==2)
+		 {
+			 stu->showMyOrder();//查看自己预约
+
+		 }
+		 else if(select==3)
+		 {
+			 stu->showAllOrder();//查看所有预约
+		 }
+		 else if(select==4)
+		 {
+			 stu->cancelOrder();//取消预约
+
+		 }
+		 else
+		 {
+			 delete student;//注销预约
+			 cout<<"注销成功"<<endl;
+			 system("pause");
+			 system("cls");
+		 }
+	}
+}
+
+//进入教师子菜单
+
+void teacherMenu(Identity * &teacher)
+
+{
+	while(true)
+	{
+		 //调用子菜单界面
+		 teacher->operMenu(); 
+
+		 //利用多态强转
+		 Teacher *tea=(Teacher*)teacher;
+		 int select=0;//接受用户选择
+		cin>>select;
+
+		if(select==1)
+		{
+			tea->showAllOrder();//查看所有预约
+		}
+		else if(select==2)
+		{
+			tea->validOrder();	//审核预约
+		}
+		else
+		{
+			delete teacher;
+			cout<<"注销成功"<<endl;
+			system("puase");
+			system("'cls");
+			return;
+		}
+	}
+}
+
+
+//添加全局函数的管理员菜单
+
+void managerMenu(Identity *&manager)
+{
+    while(true)
+    {
+        manager->operMenu();
+        Manager* man=(Manager*)manager;//强转类型
+        int select=0;
+        cin>>select;
+        if(select==1)
+        {
+            cout<<"添加账号"<<endl;
+            man->addPerson();
+        }
+        else if(select==2)
+        {
+            cout<<"查看账号"<<endl;
+            man->showPerson();
+        }
+          else if(select==2)
+        {
+            cout<<"查看机房信息"<<endl;
+            man->showcomputer();
+        }
+         else if(select==4)
+        {
+            cout<<"清空预约"<<endl;
+            man->cleanFile();
+        }
+        else 
+        {   delete manager;//销毁掉堆区对象
+            cout<<"注销成功"<<endl;
+            system("pause");
+            system("cls");
+           
+		   
+		   
+        }
+
+
+
+    }
+}
+
+
+
+void LoginIn(string fileName,int type)
+{	
+	Identity *person=NULL;
+	
+	ifstream ifs;
+	ifs.open(fileName,ios::in);
+
+	if(!ifs.is_open())
+	{
+		cout<<"文字查找"<<endl;
+		ifs.close();
+		return;
+	}
+
+	
+	int id;
+	string name;
+	string pwd;
+
+	
+	if(type==1)	
+	{
+		cout<<"请输入学号： "<<endl;
+		cin>>id;
+	}
+
+	if(type==2)	
+	{
+		cout<<"请输入教师编号： "<<endl;
+		cin>>id;
+	}
+
+
+	cout<<"请输入名字： "<<endl;
+	cin>>name;
+
+	cout<<"请输入密码： "<<endl;
+	cin>>pwd;
+
+
+	if(type==1)
+	{	
+
+	
+		int fId;   
+		string fName;
+		string fPwd;
+		while(ifs >> fId && ifs >> fName && ifs >> fPwd && ifs)
+		{
+			if( id == fId && name == fName&& pwd == fPwd)
+			{
+				cout<<"学生身份验证登录成功"<<endl;
+				system("pause");
+				system("cls");
+				person=new Student(id,name,pwd);
+				studentMenu(person);
+				return;
+				 
+			}
+            
+		}
+
+	}
+	else if(type==2)
+	{
+		int fId;   
+		string fName;
+		string fPwd;
+		while(ifs >> fId && ifs >> fName && ifs >> fPwd && ifs)
+		{
+			if(id  == fId && name == fName&& pwd == fPwd)
+			{
+				cout<<"教师身份验证登录成功"<<endl;
+				system("pause");
+				system("cls");
+				person=new Teacher(id,name,pwd);
+				 //进入教师子菜单界面
+				 teacherMenu(person);
+			}
+            
+		}
+
+	}
+	else if(type==3)
+	{
+;       //管理员身份验证
+		string fName;//从文件中获取姓名
+		string fPwd;
+		while( ifs >> fName && ifs >> fPwd && ifs)
+		{
+			if( name == fName && pwd == fPwd )
+			{
+				cout<<"管理员身份验证登录成功"<<endl;
+				system("pause");
+				system("cls");
+				person=new Manager(name,pwd);
+				 //进入管理员子菜单界面
+                    managerMenu(person);
+                return;
+			}
+            
+		}	
+	}
+	
+	
+	cout<<"验证登录失败"<<endl;
+	system("pause");
+	system("cls");
+	return;
+	
+}
